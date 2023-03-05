@@ -24,11 +24,15 @@ jobs:
           brew install ninja range-v3
       - name: Configure MaaCore
         run: |
-          mkdir build && cd build
-          cmake .. -GNinja -DBUILD_XCFRAMEWORK=ON
+          mkdir -p build
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_XCFRAMEWORK=ON -DBUILD_UNIVERSAL=ON
       - name: Build libMaaCore
-        run: cmake --build build
+        run: cmake --build build --parallel $(nproc --all)
+      - name: Prepare Artifact
+        run: |
+          mkdir -p artifact
+          cmake --install build --prefix artifact
       - uses: actions/upload-artifact@v3
         with:
           name: test
-          path: build
+          path: artifact
