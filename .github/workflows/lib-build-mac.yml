@@ -7,7 +7,7 @@ on:
 
 jobs:
   macos-latest:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -27,12 +27,15 @@ jobs:
           mkdir -p build
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_XCFRAMEWORK=ON -DBUILD_UNIVERSAL=ON
       - name: Build libMaaCore
-        run: cmake --build build --parallel $(nproc --all)
-      - name: Prepare Artifact
+        run: cmake --build build --parallel $(sysctl -n hw.ncpu)
+      - name: Prepare Library File
         run: |
-          mkdir -p artifact
-          cmake --install build --prefix artifact
+          mkdir -p libMaaCore
+          cmake --install build --prefix libMaaCore
+      - name: Comperss Files
+        run: |
+          7z a -t7z -m0=lzma2 -mx=9 -aoa -mfb=64 -md=32m -ms=on -mhe -r libs.7z libMaaCore/*
       - uses: actions/upload-artifact@v3
         with:
           name: test
-          path: artifact
+          path: libs.7z
