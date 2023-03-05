@@ -1,0 +1,34 @@
+name: dev-build-mac
+
+on:
+  push:
+    branches:
+      - lib-build-test
+
+jobs:
+  macos-latest:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 100
+      - name: Cache Homebrew
+        uses: actions/cache@v3
+        with:
+          path: $(brew --prefix)
+          key: ${{ runner.os }}-homebrew-${{ hashFiles('.config/brew/Brewfile') }}
+      - name: Install Dependencies
+        run: |
+          brew update --preinstall
+          brew install ninja range-v3
+      - name: Configure MaaCore
+        run: |
+          mkdir build && cd build
+          cmake .. -GNinja -DBUILD_XCFRAMEWORK=ON
+      - name: Build libMaaCore
+        run: cmake --build build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: test
+          path: build
