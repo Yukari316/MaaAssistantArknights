@@ -6,7 +6,7 @@ on:
       - lib-build-test
 
 jobs:
-  macos-latest:
+  build-maacore-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,7 +25,7 @@ jobs:
       - name: Configure MaaCore
         run: |
           mkdir -p build
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_XCFRAMEWORK=ON -DBUILD_UNIVERSAL=ON
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_XCFRAMEWORK=ON -DBUILD_UNIVERSAL=ON -DINSTALL_RESOURCE=ON
       - name: Build libMaaCore
         run: cmake --build build --parallel $(sysctl -n hw.ncpu)
       - name: Prepare Library File
@@ -37,5 +37,4 @@ jobs:
           7z a -t7z -m0=lzma2 -mx=9 -aoa -mfb=64 -md=32m -ms=on -mhe -r libs.7z libMaaCore/*
       - uses: actions/upload-artifact@v3
         with:
-          name: test
           path: libs.7z
